@@ -23,6 +23,36 @@ namespace WpfSignalRHub
         public MainWindow()
         {
             InitializeComponent();
+            BindEvents();
+        }
+
+        private void BindEvents()
+        {
+            ChatHub.ClientConnected += ChatHub_ClientConnected;
+            ChatHub.ClientDisconnected += ChatHub_ClientDisconnected;
+        }
+
+        private void ChatHub_ClientDisconnected(string clientId, ClientInfo msClient)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                lbConnectedClientList.Items.Add(msClient.className + " Disconnected" + " Type: " + msClient.clientType);
+            });
+            
+        }
+
+        private void ChatHub_ClientConnected(string clientId, ClientInfo msClient)
+        {
+            try
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    lbConnectedClientList.Items.Add(msClient.className + " Connected" + " Type: " + msClient.clientType);
+                });
+            }
+            catch (Exception ex)
+            {
+            }
         }
     }
 }

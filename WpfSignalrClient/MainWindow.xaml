@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfSignalrClient"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" Topmost="True"
+        Closed="Window_Closed">
     <Grid>
         <StackPanel>
             <TextBox x:Name="MessageTextBox" Width="300" Margin="5"/>
