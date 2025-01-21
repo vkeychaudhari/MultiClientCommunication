@@ -32,23 +32,30 @@ namespace WpfSignalrClient
             ConnectToHub();
         }
 
+        // Connect to the SignalR hub
         private async void ConnectToHub()
         {
+            // Create a new HubConnection with the specified URL
             _connection = new HubConnection("http://localhost:8080");
-            
+
+            // Add custom headers to the connection
             _connection.Headers.Add("ClientType", "WPF");
             _connection.Headers.Add("ClassName", "WPF Client");
             _connection.Headers.Add("IPAddress", getIPAddress());
 
+            // Create a new HubProxy with the specified hub name
             _hubProxy = _connection.CreateHubProxy("ChatHub");
 
+            // Register a callback for the "broadcastMessage" event
             _hubProxy.On<string, string>("broadcastMessage", (user, message) =>
             {
+                // Update the UI with the received message
                 Dispatcher.Invoke(() => MessagesListBox.Items.Add($"{user}: {message}"));
             });
 
             try
             {
+                // Start the connection to the hub
                 await _connection.Start();
                 MessagesListBox.Items.Add("Connected to SignalR hub.");
             }
@@ -58,6 +65,7 @@ namespace WpfSignalrClient
             }
         }
 
+        // Get the IP address of the client
         static string LanOrWifi = "";
         public string getIPAddress()
         {
@@ -105,7 +113,6 @@ namespace WpfSignalrClient
                                         IP += ip.Address.ToString();
                                         Operational_Status = ni.OperationalStatus.ToString();
                                         LanOrWifi = "LAN";
-                                        //Console.WriteLine("My WIFI IP Address is :" + ip.Address.ToString());
                                     }
                                 }
                             }
@@ -118,14 +125,11 @@ namespace WpfSignalrClient
             catch (Exception ex)
             {
                 IP = "Invalid Ip";
-                //CommonHelper.WriteErrorLog(ex);
             }
             return IP;
-
-
-            // // DebugHelper.writeDebugLog("ManageSenseClient FrmClient:- getIPAddress() calling from Start Client.");
         }
 
+        // Send a message to the SignalR hub
         private async void SendMessage_Click(object sender, RoutedEventArgs e)
         {
             if (_connection.State == ConnectionState.Connected)
@@ -139,6 +143,7 @@ namespace WpfSignalrClient
             }
         }
 
+        // Handle the window closed event
         private void Window_Closed(object sender, EventArgs e)
         {
             // Ensure you call SignalR disconnect logic

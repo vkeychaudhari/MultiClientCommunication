@@ -24,19 +24,23 @@ namespace WpfSignalRHub
 
         public void Start()
         {
+            // Define the URL for the server
             string url = "http://localhost:8080";
+
+            // Configure the SignalR hub
             var hubConfiguration = new HubConfiguration
             {
                 EnableDetailedErrors = true
             };
 
+            // Set the connection timeout and disconnect timeout
             GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(30);
             GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(7);
 
-            //GlobalHost.Configuration.KeepAlive = TimeSpan.FromSeconds(10); // Default is 2 minutes
-            //GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(30); // Default is 30 seconds
-
+            // Start the SignalR server with the specified URL and configuration
             _signalR = WebApp.Start<Startup>(url);
+
+            // Print the server URL to the console
             System.Console.WriteLine($"Server started at {url}");
         }
 

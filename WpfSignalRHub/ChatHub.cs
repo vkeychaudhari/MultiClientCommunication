@@ -17,6 +17,7 @@ namespace WpfSignalRHub
         public static event ClientConnectionEventHandler ClientConnected;
         public static event ClientConnectionEventHandler ClientDisconnected;
 
+        // Override the OnConnected method to handle client connection
         public override Task OnConnected()
         {
             ClientInfo etClient = PopulateClient("Connected");
@@ -25,15 +26,25 @@ namespace WpfSignalRHub
             return base.OnConnected();
         }
 
+        // Override the OnDisconnected method to handle client disconnection
         public override Task OnDisconnected(bool stopCalled)
         {
-            ClientInfo etClient = PopulateClient("DisConnected");
-            string classname;
-            _allClients.TryRemove(Context.ConnectionId, out classname);
-            ClientDisconnected?.Invoke(Context.ConnectionId, etClient);
+            try
+            {
+                ClientInfo etClient = PopulateClient("DisConnected");
+                string classname;
+                _allClients.TryRemove(Context.ConnectionId, out classname);
+                ClientDisconnected?.Invoke(Context.ConnectionId, etClient);
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception here
+                Console.WriteLine("An error occurred: " + ex.Message);
+            }
             return base.OnDisconnected(stopCalled);
         }
 
+        // Populate the client information based on the connection headers and status
         private ClientInfo PopulateClient(string _Status)
         {
             ClientInfo etClient = new ClientInfo();
@@ -48,7 +59,7 @@ namespace WpfSignalRHub
 
             if (Context.Headers["ClassName"] != null)
                 etClient.className = Context.Headers["ClassName"];
-            
+
             if (Context.Headers["IPAddress"] != null)
                 etClient.clientIP_Address = Context.Headers["IPAddress"];
 
@@ -64,12 +75,14 @@ namespace WpfSignalRHub
             return etClient;
         }
 
+        // Send a message to all clients
         public void SendMessage(string user, string message)
         {
             Clients.All.broadcastMessage(user, message);
         }
     }
 
+    // Class to hold client information
     public class ClientInfo
     {
         public string clientType;

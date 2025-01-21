@@ -28,6 +28,7 @@ namespace WpfSignalRHub
 
         private void BindEvents()
         {
+            // Bind the event handlers to the corresponding events
             ChatHub.ClientConnected += ChatHub_ClientConnected;
             ChatHub.ClientDisconnected += ChatHub_ClientDisconnected;
         }
@@ -36,9 +37,10 @@ namespace WpfSignalRHub
         {
             Dispatcher.Invoke(() =>
             {
+                // Add a new item to the connected client list when a client is disconnected
                 lbConnectedClientList.Items.Add(msClient.className + " Disconnected" + " Type: " + msClient.clientType);
             });
-            
+
         }
 
         private void ChatHub_ClientConnected(string clientId, ClientInfo msClient)
@@ -47,11 +49,13 @@ namespace WpfSignalRHub
             {
                 Dispatcher.Invoke(() =>
                 {
+                    // Add a new item to the connected client list when a client is connected
                     lbConnectedClientList.Items.Add(msClient.className + " Connected" + " Type: " + msClient.clientType);
                 });
             }
             catch (Exception ex)
             {
+                // Handle any exceptions that occur during the event handling
             }
         }
     }

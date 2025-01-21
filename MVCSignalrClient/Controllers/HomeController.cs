@@ -98,6 +98,7 @@ namespace MVCSignalrClient.Controllers
 
 
         [HttpPost]
+        // Sends a message to the server
         public async Task<IActionResult> SendMessage(string user, string message)
         {
             if (_connection.State == ConnectionState.Disconnected)
@@ -109,17 +110,20 @@ namespace MVCSignalrClient.Controllers
             return RedirectToAction("Index");
         }
 
+        // Displays the home page
         public IActionResult Index()
         {
             return View();
         }
 
+        // Displays the privacy page
         public IActionResult Privacy()
         {
             return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        // Displays the error page
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
