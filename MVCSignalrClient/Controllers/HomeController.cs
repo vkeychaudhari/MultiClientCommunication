@@ -4,98 +4,48 @@ using System.Diagnostics;
 using Microsoft.AspNet.SignalR.Client;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.NetworkInformation;
+using Microsoft.AspNetCore.Components;
+using System.Collections.Concurrent;
 
 namespace MVCSignalrClient.Controllers
 {
     public class HomeController : Controller
     {
+        private static ConcurrentDictionary<string, string> clientList = new ConcurrentDictionary<string, string>();
         private IHubProxy _hubProxy;
         private HubConnection _connection;
 
         private readonly ILogger<HomeController> _logger;
 
+        private static bool isConnectionInitialized = false;
+
         public HomeController(ILogger<HomeController> logger)
         {
-            _logger = logger;
-            _connection = new HubConnection("http://localhost:8080");
+            //_logger = logger;
+            //_connection = new HubConnection("http://localhost:8080");
 
-            _connection.Headers.Add("ClientType", "WEB");
-            _connection.Headers.Add("ClassName", "WEB Client");
-            _connection.Headers.Add("IPAddress", getIPAddress());
+            //_connection.Headers.Add("ClientType", "WEB");
+            //_connection.Headers.Add("ClassName", "WEB Client");
+            ////_connection.Headers.Add("IPAddress", getIPAddress());
 
-            _hubProxy = _connection.CreateHubProxy("ChatHub");
+            //_hubProxy = _connection.CreateHubProxy("ChatHub");
+
+            //// Register a callback for the "getClientList" event
+            //_hubProxy.On<ConcurrentDictionary<string, string>>("getClientList", (_clientList) =>
+            //{
+            //    clientList = _clientList;
+            //    // Update the UI with the received message
+            //    //Dispatcher.Invoke(() => MessagesListBox.Items.Add($"{user}: {message}"));
+            //});
 
             //_connection.Start();
         }
 
-        static string LanOrWifi = "";
-        public string getIPAddress()
+        [HttpGet]
+        public IActionResult GetClientList()
         {
-            string IP = "";
-            string Operational_Status = "";
-            try
-            {
-                //WiFi
-                foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
-                {
-
-                    if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                    {
-                        foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
-                        {
-                            if (ip.IsDnsEligible)
-                            {
-                                if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                                {
-                                    IP = ip.Address.ToString();
-                                    Operational_Status = ni.OperationalStatus.ToString();
-                                    LanOrWifi = "WiFi";
-                                }
-                            }
-                        }
-                    }
-                }
-                if (IP != "")
-                    IP += "-";
-                //LAN
-                foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
-                {
-                    if (ni.NetworkInterfaceType != NetworkInterfaceType.Wireless80211 && ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                    {
-                        var addr = ni.GetIPProperties().GatewayAddresses.FirstOrDefault();
-                        if (addr != null && !addr.Address.ToString().Equals("0.0.0.0"))
-                        {
-                            foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
-                            {
-                                if (ip.IsDnsEligible)
-                                {
-                                    if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                                    {
-                                        // All IP Address in the LAN
-                                        IP += ip.Address.ToString();
-                                        Operational_Status = ni.OperationalStatus.ToString();
-                                        LanOrWifi = "LAN";
-                                        //Console.WriteLine("My WIFI IP Address is :" + ip.Address.ToString());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                if (!IP.Contains("-"))
-                    IP = "-" + IP;
-            }
-            catch (Exception ex)
-            {
-                IP = "Invalid Ip";
-                //CommonHelper.WriteErrorLog(ex);
-            }
-            return IP;
-
-
-            // // DebugHelper.writeDebugLog("ManageSenseClient FrmClient:- getIPAddress() calling from Start Client.");
+            return Json(clientList);
         }
-
 
         [HttpPost]
         // Sends a message to the server
@@ -113,7 +63,35 @@ namespace MVCSignalrClient.Controllers
         // Displays the home page
         public IActionResult Index()
         {
+            InitializeConnection();
+            //if (HttpContext.Session.GetString("ConnectionInitialized") != "true")
+            //{
+            //    InitializeConnection();
+            //    HttpContext.Session.SetString("ConnectionInitialized", "true");
+            //}
             return View();
+        }
+
+        private void InitializeConnection()
+        {
+            if(_connection != null) _connection.Stop();
+            _connection = new HubConnection("http://localhost:8080");
+
+            _connection.Headers.Add("ClientType", "WEB");
+            _connection.Headers.Add("ClassName", "WEB Client");
+            //_connection.Headers.Add("IPAddress", getIPAddress());
+
+            _hubProxy = _connection.CreateHubProxy("ChatHub");
+
+            // Register a callback for the "getClientList" event
+            _hubProxy.On<ConcurrentDictionary<string, string>>("getClientList", (_clientList) =>
+            {
+                clientList = _clientList;
+                // Update the UI with the received message
+                //Dispatcher.Invoke(() => MessagesListBox.Items.Add($"{user}: {message}"));
+            });
+
+            _connection.Start();
         }
 
         // Displays the privacy page

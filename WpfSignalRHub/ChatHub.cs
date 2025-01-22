@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNet.SignalR;
+using Microsoft.AspNet.SignalR.Messaging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,10 +24,12 @@ namespace WpfSignalRHub
         {
             ClientInfo etClient = PopulateClient("Connected");
             _allClients.TryAdd(Context.ConnectionId, etClient.className);
+            SendClientList(_allClients);
             ClientConnected?.Invoke(Context.ConnectionId, etClient);
             return base.OnConnected();
         }
 
+       
         // Override the OnDisconnected method to handle client disconnection
         public override Task OnDisconnected(bool stopCalled)
         {
@@ -34,6 +38,7 @@ namespace WpfSignalRHub
                 ClientInfo etClient = PopulateClient("DisConnected");
                 string classname;
                 _allClients.TryRemove(Context.ConnectionId, out classname);
+                SendClientList(_allClients);
                 ClientDisconnected?.Invoke(Context.ConnectionId, etClient);
             }
             catch (Exception ex)
@@ -73,6 +78,11 @@ namespace WpfSignalRHub
                     break;
             }
             return etClient;
+        }
+
+        private void SendClientList(ConcurrentDictionary<string, string> allClients)
+        {
+            Clients.All.getClientList(allClients);
         }
 
         // Send a message to all clients
