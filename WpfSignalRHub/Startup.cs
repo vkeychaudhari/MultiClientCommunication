@@ -37,6 +37,8 @@ namespace WpfSignalRHub
             GlobalHost.Configuration.ConnectionTimeout = TimeSpan.FromSeconds(30);
             GlobalHost.Configuration.DisconnectTimeout = TimeSpan.FromSeconds(7);
 
+            GlobalHost.Configuration.KeepAlive = new TimeSpan(0, 0, 2);
+
             // Start the SignalR server with the specified URL and configuration
             _signalR = WebApp.Start<Startup>(url);
 

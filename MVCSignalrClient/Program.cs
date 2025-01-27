@@ -1,7 +1,9 @@
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using MVCSignalrClient.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton<SignalRServerClientHelper>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
